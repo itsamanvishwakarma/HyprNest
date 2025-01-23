@@ -61,7 +61,7 @@ cp .zshrc $HOME
 + Clone this repository change into the `HyprNest` directory:
 ```
 git clone https://github.com/d-shubh/HyprNest.git
-cd Hyprnest
+cd HyprNest
 ```
 + Make the Script Executable: 
 ``` 
