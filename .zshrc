@@ -19,15 +19,21 @@ done
 # vim mode configurations
 bindkey -v
 export KEYTIMEOUT=1
-bindkey "^?" backward-delete-char
-bindkey -M menuselect 'h' vi-backward-char
-bindkey -M menuselect 'j' vi-down-line-or-history
-bindkey -M menuselect 'k' vi-up-line-or-history
-bindkey -M menuselect 'l' vi-forward-char
-bindkey -M menuselect 'left' vi-backward-char
-bindkey -M menuselect 'down' vi-up-line-or-history
-bindkey -M menuselect 'up' vi-up-line-or-history
-bindkey -M menuselect 'right' vi-forward-char
+# `menuselect` keymap becomes available when module `zsh/complist` is loaded
+# The `supercharge` plugin sourced above already loads this module
+# If you do not wish to use that plugin, you can enable it manually by uncommenting the below line:
+# zmodload zsh/complist
+if bindkey -M menuselect &>/dev/null; then
+  bindkey -M menuselect 'h' vi-backward-char
+  bindkey -M menuselect 'j' vi-down-line-or-history
+  bindkey -M menuselect 'k' vi-up-line-or-history
+  bindkey -M menuselect 'l' vi-forward-char
+  bindkey -M menuselect 'left' vi-backward-char
+  bindkey -M menuselect 'down' vi-up-line-or-history
+  bindkey -M menuselect 'up' vi-up-line-or-history
+  bindkey -M menuselect 'right' vi-forward-char
+fi
+
 
 # Aliases
 alias ls='lsd --group-directories-first'
