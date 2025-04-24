@@ -46,16 +46,23 @@ jq ripgrep alsa-utils sof-firmware pipewire wireplumber pipewire-alsa pipewire-p
   
 ```Note: (zsh-plugin installation is optional; if you don't want them: just remove the lines that source those plugins in the ~/.zshrc)```
 
-5. Clone this repo and copy everything under ```.config``` and ```Pictures```(optional) directory to your .config and Picures directory:
+5. Install eww following the [eww documentation](https://elkowar.github.io/eww) and then copy the eww binary to your $HOME/.local/bin
 
 ```
-git clone https://github/com/d-shubh./HyprNest.git
+mkdir -p "$HOME/.local/bin"
+cp path/to/eww "$HOME/.local/bin/"
+```
+
+6. Clone this repo and copy everything under ```.config``` and ```Pictures```(optional) directory to your .config and Pictures directory:
+
+```
+git clone https://github.com/shu8h0-null/HyprNest.git
 cd HyprNest
 cp -r .config/* $HOME/.config/
 cp -r Pictures $HOME
 cp .zshrc $HOME
 ```
-5. Reboot your system. And... your are done ;-)
+7. Reboot your system. And... your are done ;-)
 
 #### Install via script:
 + Clone this repository change into the `HyprNest` directory:

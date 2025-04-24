@@ -1,9 +1,12 @@
 #!/bin/bash
 
+HYPRNEST_DIR="$(pwd)"
+
 # Define text colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
+YELLOW='\033[0;33m'
 BOLD='\033[1m'
 RESET='\033[0m'
 
@@ -65,6 +68,62 @@ check_bluetooth() {
     fi
 }
 
+# Backup existing files
+backup_file() {
+    local file="$1"
+    [[ -e "$file" ]] || return 0
+
+    local backup="${file}.backup.$(date +%Y%m%d_%H%M%S)"
+    echo -e "${YELLOW}${BOLD}Backing up ${file} to ${backup}${RESET}"
+    mv "$file" "$backup"
+    check_status "Backup created" "Backup failed"
+}
+
+# Safely clone a repo
+safe_clone() {
+    local repo="$1"
+    local dir="$2"
+
+    if [ -d "$dir" ]; then
+        echo -e "${YELLOW}${BOLD}Directory ${dir} already exists.${RESET}"
+        read -rp "$(echo -e "${CYAN}${BOLD}Remove and clone again? (y/n):${RESET} ")" choice
+        [[ $choice =~ ^[Yy](es)?$ ]] || {
+            echo -e "${GREEN}${BOLD}Skipping clone of ${repo}${RESET}"
+            return 0
+        }
+        rm -rf "$dir"
+    fi
+
+    git clone "$repo" "$dir"
+    check_status "Cloned $repo" "Failed to clone $repo"
+}
+
+# Safely copy files/directories
+safe_copy() {
+	local src="$1"
+    local dest="$2"
+	local src_dir_name="$(basename "$1")"
+	local dest_dir_name="$dest/$src_dir_name"
+
+    [[ -e "$src" ]] || {
+        echo -e "${RED}${BOLD}Error: Source ${src} does not exist.${RESET}"
+        return 1
+    }
+
+    if [ -e "$dest_dir_name" ]; then
+        echo -e "${YELLOW}${BOLD}${dest_dir_name} already exists.${RESET}"
+        read -rp "$(echo -e "${CYAN}${BOLD}Do you want to backup and replace? (y/n):${RESET} ")" choice
+        [[ $choice =~ ^[Yy](es)?$ ]] || {
+            echo -e "${GREEN}${BOLD}Skipping copy of ${src}${RESET}"
+            return 0
+        }
+        backup_file "$dest_dir_name"
+    fi
+
+    cp -r "$src" "$dest"
+    check_status "Copied $src to $dest" "Failed to copy $src"
+}
+
 # Warning message
 echo -e "${RED}${BOLD}WARNING:${RESET}Don't blindly run this script without knowing what it entails! This script is going to make changes on your system, before proceeding further, make sure you already backup up your current system."
 echo -e "${CYAN}${BOLD}Please read and understand the script before proceeding.${RESET}"
@@ -103,10 +162,10 @@ else
 
     # Install the AUR helper
     sudo pacman -S --needed git base-devel
-    git clone https://aur.archlinux.org/$aur_helper.git
-    cd $aur_helper
+    safe_clone https://aur.archlinux.org/$aur_helper.git $HOME/$aur_helper
+    cd $HOME/$aur_helper
     makepkg -si
-    cd ..
+    cd $HOME
     check_status "$aur_helper is installed. Proceeding further..." "Failed to install $aur_helper."
 fi
 
@@ -126,21 +185,18 @@ $aur_helper -S --noconfirm zsh
 # Change the default shell to Zsh
 echo -e "${GREEN}${BOLD}Changing default shell to Zsh...${RESET}"
 chsh -s /bin/zsh
-touch ~/.zshrc
+# Backup existing .zshrc if it exists
+backup_file "$HOME/.zshrc"
+touch "$HOME/.zshrc"
 
 # Install Zsh plugins
 ZSH_PLUGIN_DIR="$HOME/.local/share/zsh-plugins"
-echo -e "${GREEN}${BOLD}Installing Zsh plugins: zsh-syntax-highlighting, zsh-autosuggestions, supercharge...${RESET}"
+echo -e "${GREEN}${BOLD}Cloning Zsh plugins: zsh-syntax-highlighting, zsh-autosuggestions, supercharge...${RESET}"
 mkdir -p "$ZSH_PLUGIN_DIR"
 
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting"
-check_status "zsh-syntax-highlighting installed." "Failed to install zsh-syntax-highlighting."
-
-git clone https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_PLUGIN_DIR/zsh-autosuggestions"
-check_status "zsh-autosuggestions installed." "Failed to install zsh-autosuggestions."
-
-git clone https://github.com/zap-zsh/supercharge.git "$ZSH_PLUGIN_DIR/supercharge"
-check_status "supercharge installed." "Failed to install supercharge."
+safe_clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting"
+safe_clone https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_PLUGIN_DIR/zsh-autosuggestions"
+safe_clone https://github.com/zap-zsh/supercharge.git "$ZSH_PLUGIN_DIR/supercharge"
 
 # List of packages to install
 packages=(
@@ -171,10 +227,6 @@ packages=(
     grim
     slurp
     swayimg
-    gtk3
-    libdbusmenu-glib
-    libdbusmenu-gtk3
-    gtk-layer-shell
     dunst
     playerctl
     ffmpeg
@@ -197,7 +249,7 @@ packages=(
 )
 
 # Install the packages
-echo -e "${GREEN}${BOLD}Installing the required packages...${RESET}"
+echo -e "${CYAN}${BOLD}Installing the required packages...${RESET}"
 $aur_helper -S --noconfirm "${packages[@]}"
 check_status "Packages installed successfully." "Failed to install packages."
 
@@ -205,23 +257,39 @@ check_status "Packages installed successfully." "Failed to install packages."
 echo -e "${GREEN}${BOLD}Updating user directories...${RESET}"
 xdg-user-dirs-update
 
-# Install eww widgets
+# Setup eww widgets
+eww_deps=(
+    rustup
+    gtk3
+    gtk-layer-shell
+    pango
+    gdk-pixbuf2
+    libdbusmenu-gtk3
+    cairo
+    glib2
+    gcc-libs
+    glibc
+)
+echo -e "${CYAN}${BOLD}Installing dependecies for eww...${RESET}"
+$aur_helper -S --noconfirm "${eww_deps[@]}"
+check_status "All are dependecies installed." "Failed to dependecies for eww"
+
 echo -e "${GREEN}${BOLD}Installing eww widgets...${RESET}"
-git clone https://github.com/elkowar/eww
-cd eww
+safe_clone https://github.com/elkowar/eww $HOME/eww
+cd $HOME/eww
 cargo build --release --no-default-features --features=wayland
 check_status "Eww build successful." "Failed to build Eww."
-cd target/release
+cd $HOME/eww/target/release
 chmod +x ./eww
 mkdir -p $HOME/.local/bin
 cp eww $HOME/.local/bin
 cd $HOME
 echo -e "${GREEN}${BOLD}Eww widgets installed successfully.${RESET}"
 
-git clone https://github/com/d-shubh./HyprNest.git
-cd HyprNest
-cp -r .config/* $HOME/.config/
-cp -r Pictures $HOME
-cp .zshrc $HOME
+for dir in $HYPRNEST_DIR/.config/*; do
+	safe_copy $dir $HOME/.config
+done
+safe_copy $HYPRNEST_DIR/.zshrc $HOME
+safe_copy $HYPRNEST_DIR/Pictures $HOME
 
 echo -e "${GREEN}${BOLD}Installation complete :-)\n Please reboot your system. ${RESET}"
