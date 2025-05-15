@@ -4,6 +4,8 @@
   bg: #1e1e2e;
   bg-alt: #313244;
   fg: #cdd6f4;
+  fg-alt: #74c7ec;
+  urgent: #f38ba8;
 
   background-color: @bg;
 }

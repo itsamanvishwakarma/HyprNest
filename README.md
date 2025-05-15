@@ -5,7 +5,7 @@
 + Bar🍫 : [Waybar](https://github.com/Alexays/Waybar).
 + Lockscreen🔒 : [Hyprlock](https://github.com/hyprwm/hyprlock).
 + Wallpaper utility🌅 : [swww](https://github.com/LGFae/swww) with [Waypaper](https://github.com/anufrievroman/waypaper).
-+ Launcher🚀 :  [rofi-lbonn-wayland](https://aur.archlinux.org/packages/rofi-lbonn-wayland-git).
++ Launcher🚀 :  [rofi-wayland](https://archlinux.org/packages/extra/x86_64/rofi-wayland/).
 + Widgets : [Eww](https://github.com/elkowar/eww).
 + Terminal💻 : [kitty](https://github.com/kovidgoyal/kitty).
 + Shell🐚 : ```zsh``` with [Starship prompt](https://starship.rs/).
@@ -36,7 +36,7 @@
 
 
 ```
-jq ripgrep alsa-utils sof-firmware pipewire wireplumber pipewire-alsa pipewire-pulse brightnessctl blueman hyprland hyprlock waybar xdg-utils xdg-user-dirs rofi-lbonn-wayland-git kitty neovim wl-clipboard thunar thunar-volman tumbler gvfs thefuck grim slurp swayimg gtk3 libdbusmenu-glib libdbusmenu-gtk3 gtk-layer-shell dunst playerctl ffmpeg vlc gammastep lsd starship fastfetch cava btop swww waypaper firefox ttf-jetbrains-mono-nerd ttf-victor-mono-nerd adobe-source-han-sans-jp-fonts otf-opendyslexic-nerd nwg-look gradience
+jq ripgrep alsa-utils sof-firmware pipewire wireplumber pipewire-alsa pipewire-pulse brightnessctl blueman hyprland hyprlock waybar xdg-utils xdg-user-dirs rofi-wayland kitty neovim wl-clipboard thunar thunar-volman tumbler gvfs thefuck grim slurp swayimg gtk3 libdbusmenu-glib libdbusmenu-gtk3 gtk-layer-shell dunst playerctl ffmpeg vlc gammastep lsd starship fastfetch cava btop swww waypaper firefox ttf-jetbrains-mono-nerd ttf-victor-mono-nerd adobe-source-han-sans-jp-fonts otf-opendyslexic-nerd nwg-look gradience
 ```
 
 4. Clone the following zsh-plugins in your ```~/.local/share/zsh-plugins``` directory (make one, if directory already not present):

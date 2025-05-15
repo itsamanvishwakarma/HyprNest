@@ -215,7 +215,7 @@ packages=(
     waybar
     xdg-utils
     xdg-user-dirs
-    rofi-lbonn-wayland-git
+    rofi-wayland
     kitty
     neovim
     wl-clipboard
